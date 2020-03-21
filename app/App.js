@@ -15,6 +15,7 @@ import {
   Text,
   StatusBar,
 } from 'react-native';
+import io from 'socket.io-client'
 
 import {
   Header,
@@ -24,7 +25,30 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const App: () => React$Node = () => {
+class App extends React.Component {
+  constructor() {
+    super()
+    this.state = {text: ''}
+  }
+  componentDidMount() {
+    this.socket = io('http://localhost:8080');
+    this.socket.on("connect", () => {
+      this.socket.on('hello', () => {
+        console.log("hello!")
+      })
+      console.log('connected')
+      this.socket.on("lol", ({ text }) => {
+        console.log('received on change')
+        this.setState({ text })
+      })
+    })
+  }
+  // handleChange = (text) => {
+  //   console.log('text', text)
+  //   this.socket.emit("onChange", { text: text.target.value })
+  // }
+
+  render() {
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -39,6 +63,7 @@ const App: () => React$Node = () => {
             </View>
           )}
           <View style={styles.body}>
+            <Text>Received Text: "{this.state.text}"</Text>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Step One</Text>
               <Text style={styles.sectionDescription}>
@@ -70,6 +95,7 @@ const App: () => React$Node = () => {
       </SafeAreaView>
     </>
   );
+  }
 };
 
 const styles = StyleSheet.create({

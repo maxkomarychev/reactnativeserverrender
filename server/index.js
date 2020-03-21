@@ -18,9 +18,14 @@ function handler (req, res) {
   });
 }
 
+const sockets = []
+
 io.on('connection', function (socket) {
+    sockets.push(socket)
   console.log("connected")
-  socket.on("onChange", (data) => {
+  socket.emit("hello")
+  socket.on("lol", (data) => {
+      socket.broadcast.emit("lol", data)
     console.log(data);
   })
 });

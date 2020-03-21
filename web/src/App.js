@@ -9,10 +9,16 @@ class App extends React.Component {
   }
   componentDidMount() {
     this.socket = io('http://localhost:8080');
+    this.socket.on('connect', () => {
+      console.log('connected')
+      this.socket.on('hello', () => {
+        console.log("hello!")
+      })
+    })
   }
   handleChange = (text) => {
-    console.log('text', text)
-    this.socket.emit("onChange", { text: text.target.value })
+    // console.log('text', text)
+    this.socket.emit("lol", { text: text.target.value })
   }
   render() {
   return (
