@@ -18,6 +18,9 @@ function App() {
         >
           Learn React
         </a>
+        <div>
+          <textarea />
+        </div>
       </header>
     </div>
   );
