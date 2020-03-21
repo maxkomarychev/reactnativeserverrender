@@ -19,8 +19,8 @@ function handler (req, res) {
 }
 
 io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
+  console.log("connected")
+  socket.on("onChange", (data) => {
     console.log(data);
-  });
+  })
 });

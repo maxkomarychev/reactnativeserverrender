@@ -6,14 +6,13 @@ import io from 'socket.io-client'
 class App extends React.Component {
   constructor() {
     super()
-    // this.socket = new io("http://localhost", {port:8080})
   }
   componentDidMount() {
-    var socket = io('http://localhost:8080');
-    socket.on('news', function (data) {
-      console.log(data);
-      socket.emit('my other event', { my: 'data' });
-    });
+    this.socket = io('http://localhost:8080');
+  }
+  handleChange = (text) => {
+    console.log('text', text)
+    this.socket.emit("onChange", { text: text.target.value })
   }
   render() {
   return (
@@ -32,7 +31,7 @@ class App extends React.Component {
           Learn React
         </a>
         <div>
-          <textarea />
+          <textarea onChange={this.handleChange}/>
         </div>
       </header>
     </div>
