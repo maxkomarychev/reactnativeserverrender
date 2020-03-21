@@ -14,6 +14,7 @@ import {
   View,
   Text,
   StatusBar,
+  Button,
 } from 'react-native';
 import io from 'socket.io-client'
 
@@ -25,11 +26,34 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-class App extends React.Component {
-  constructor() {
-    super()
-    this.state = {text: ''}
+const Components = {
+  Text,
+  View,
+  Button,
+}
+
+class Renderer extends React.Component {
+  render() {
+    const { component, props, children } = this.props
+    const Component = Components[component]
+    if (!Component) {
+      return null
+    }
+    return React.createElement(
+          Component,
+          props,
+          Array.isArray(children) ?
+          children.map(child => <Renderer {...child} />) : children
+        )
   }
+}
+
+class App extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {jsx: ''}
+  }
+
   componentDidMount() {
     this.socket = io('http://localhost:8080');
     this.socket.on("connect", () => {
@@ -37,64 +61,23 @@ class App extends React.Component {
         console.log("hello!")
       })
       console.log('connected')
-      this.socket.on("lol", ({ text }) => {
-        console.log('received on change')
-        this.setState({ text })
+      this.socket.on("jsx", data => {
+        console.log('on jsx', data)
+        this.setState({jsx: data.jsx, hasError: false, error: undefined })
       })
     })
   }
-  // handleChange = (text) => {
-  //   console.log('text', text)
-  //   this.socket.emit("onChange", { text: text.target.value })
-  // }
-
   render() {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <Text>Received Text: "{this.state.text}"</Text>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
+    const { jsx, } = this.state
+    return (
+      <View style={styles.body}>
+        <Text>Received Text: "{this.state.text}"</Text>
+        <Text>Dynamic renderer:</Text>
+        <View style={{ flex: 1, borderWidth: 3, borderColor: "red" }}>
+          <Renderer {...jsx} />
+        </View>
+      </View>
+    );
   }
 };
 
@@ -107,7 +90,9 @@ const styles = StyleSheet.create({
     right: 0,
   },
   body: {
+    paddingTop: 40,
     backgroundColor: Colors.white,
+    flex: 1,
   },
   sectionContainer: {
     marginTop: 32,

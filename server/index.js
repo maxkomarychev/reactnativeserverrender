@@ -21,11 +21,10 @@ function handler (req, res) {
 const sockets = []
 
 io.on('connection', function (socket) {
-    sockets.push(socket)
+  sockets.push(socket)
   console.log("connected")
-  socket.emit("hello")
-  socket.on("lol", (data) => {
-      socket.broadcast.emit("lol", data)
+  socket.on("jsx", (data) => {
+    socket.broadcast.emit("jsx", data)
     console.log(data);
   })
 });
